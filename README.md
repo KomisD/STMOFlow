@@ -16,6 +16,17 @@ Although the detection model is highly sensitive to small objects thanks to its 
 
 _Framework with tracking can be used with a different detection model as well_
 
+## Demo Videos
+
+The videos below showcase the difference between the plain detection model and the enhanced framework that includes filtering via tracking. In the first video, you can see the raw detections produced by the model using temporal cues, which, while sensitive to tiny objects, also yield several false positives. The second video demonstrates how the tracking module refines these detections by filtering out inconsistent results, leading to more accurate and reliable outputs.
+
+- **Video 1: Plain Detections**  
+  This video illustrates the detections obtained directly from the model without any filtering.
+
+- **Video 2: Filtered Detections**  
+  This video shows the detections after applying the tracking-based filtering, which significantly reduces false positives.
+
+*Replace the placeholder links below with your actual video URLs or file paths:*
 
 https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
 
