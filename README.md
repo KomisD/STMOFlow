@@ -17,17 +17,33 @@ https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac
 
 
 
-# Installation
+# STMOFlow Installation Guide
+This guide will walk you through setting up the STMOFlow project locally. It includes instructions on forking the repository, cloning it, creating a Conda environment, activating it, and installing the necessary dependencies.
 
+## Fork the Repository
+- Fork the Repository
+- Clone Your Repository:
+```
+git clone https://github.com/your-username/STMOFlow.git
+```
+- Navigate into the Repository:
+```
+cd STMOFlow
+```
+
+## Set Up Your Conda Environment
+- Create a Conda Environment
 ```
 conda create -n STMOFlow python=3.12.4
 ```
-
+- Activate the Environment
 ```
 conda activate STMOFlow
 ```
 
+## Install the Project Dependencies
 ```
 pip install -r requirements.txt
 ```
+
 
