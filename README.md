@@ -5,9 +5,7 @@ STMOFlow is an official implementation of the techniques described in the paper 
 
 ![Project Image](./output_video/model_architecture.png)
 
-### Model Overview
-
-- **Spatiotemporal Integration:**  
+### Model Overview 
   The core detection model leverages a two-stream architecture to effectively integrate temporal context with a dual-path approach where one stream processes a stack of consecutive frames to extract robust spatial features, while the other computes optical flow to explicitly capture motion dynamics.
 
 ### Tracking Integration
