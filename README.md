@@ -26,8 +26,6 @@ The videos below showcase the difference between the plain detection model and t
 - **Video 2: Filtered Detections**  
   This video shows the detections after applying the tracking-based filtering, which significantly reduces false positives.
 
-*Replace the placeholder links below with your actual video URLs or file paths:*
-
 https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
 
 
