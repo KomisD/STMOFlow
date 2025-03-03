@@ -1,6 +1,8 @@
 # STMOFlow
 Official implimentation of STMOFlow: A Spatiotemporal Framework for  Real-Time Small Object Detection
 
+![Project Image](./output_video/model_architecture.png)
+
 # Installation
 
 ```
@@ -14,3 +16,4 @@ conda activate STMOFlow
 ```
 pip install -r requirements.txt
 ```
+
