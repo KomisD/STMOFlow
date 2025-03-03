@@ -46,4 +46,35 @@ conda activate STMOFlow
 pip install -r requirements.txt
 ```
 
+# Detect In a Local Video
+
+This section explains how to run the inference scripts for both plain detection and detection with tracking. Both scripts process a local video file and optionally save the results to a file when the `--save` flag is used.
+
+
+## Plain Detection
+
+The plain detection script uses a sliding window to merge consecutive video frames and performs YOLO detection on the merged frame. It then displays the detection results in a window and, if enabled, writes the detection details to a text file.
+
+```
+   python plain_detection.py path/to/your/video.mp4
+```
+
+## Detection with Tracking
+
+The detection with tracking script integrates YOLO detection with DeepSORT tracking. In addition to running detection, it uses a tracker to maintain object identities across frames. The script visualizes:
+
+- Green Boxes: YOLO detections.
+- Red Boxes: Tracker outputs.
+- Blue Boxes: Final detection boxes (after filtering based on IoU with tracker boxes).
+
+```
+python detection_with_tracking.py path/to/your/video.mp4
+```
+
+If you want to save the detections, you may run:
+```
+python detection_with_tracking.py path/to/your/video.mp4 --save
+```
+
+
 
