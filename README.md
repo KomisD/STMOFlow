@@ -3,12 +3,11 @@ Official implementation of STMOFlow: A Spatiotemporal Framework for  Real-Time S
 
 ![Project Image](./output_video/model_architecture.png)
 
-<div>
-  <video width="320" height="240" controls>
-    <source src="./output_video/video_with_detections (online-video-cutter.com).mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
+
+
+https://github.com/user-attachments/assets/e2eceba3-6a36-46f0-90e0-8a44228d7a47
+
+
 
 
 
