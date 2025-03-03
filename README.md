@@ -3,7 +3,7 @@
 
 STMOFlow is an official implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real-Time Small Object Detection."**
 
-An efficient way to detect small objects and reduce the false positives.
+An efficient way to detect small objects and reduce false positives.
 
 ![Project Image](./output_video/model_architecture.png)
 
