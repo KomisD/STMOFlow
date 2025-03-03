@@ -1,5 +1,5 @@
 # STMOFlow
-Official implimentation of STMOFlow: A Spatiotemporal Framework for  Real-Time Small Object Detection
+Official implementation of STMOFlow: A Spatiotemporal Framework for  Real-Time Small Object Detection
 
 ![Project Image](./output_video/model_architecture.png)
 
