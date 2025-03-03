@@ -5,12 +5,14 @@ STMOFlow is an official implementation of the techniques described in the paper 
 
 ![Project Image](./output_video/model_architecture.png)
 
-### Model Overview 
-  The core detection model leverages a two-stream architecture to effectively integrate temporal context with a dual-path approach where one stream processes a stack of consecutive frames to extract robust spatial features, while the other computes optical flow to explicitly capture motion dynamics.
+
+### Model Overview
+
+The core detection model leverages a two-stream architecture that integrates temporal context in two ways: one stream processes a stack of consecutive frames to extract robust spatial features, while the other computes optical flow to explicitly capture motion dynamics. This dual-path approach enables the detection model to pick up even the tiniest objects by exploiting subtle temporal cues.
 
 ### Tracking Integration
 
-  The framework have a tracker that helps **reduce false positives** by **filtering out detections** that do not have temporal consistency. By computing the Intersection over Union (IoU) between detection boxes and tracker boxes, only those detections that are supported by the tracker (i.e., exceed a low IoU threshold) are retained. In cases where detections are inconsistent or missing, the tracker’s output can serve as a fallback, thus further refining the overall detection performance.
+Although the detection model is highly sensitive to small objects thanks to its temporal cue integration, it tends to produce a number of false positives. To address this, the framework incorporates a robust tracking module that serves as a filter. The tracker computes the Intersection over Union (IoU) between detection boxes and tracker boxes, and only detections that exceed a low IoU threshold—thus demonstrating temporal consistency—are retained. In situations where the detection model's outputs are inconsistent or incomplete, the tracker’s reliable predictions act as a fallback, substantially minimizing false positives and refining overall detection performance.
 
 
 https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
