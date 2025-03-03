@@ -14,6 +14,8 @@ The core detection model leverages a two-stream architecture that integrates tem
 
 Although the detection model is highly sensitive to small objects thanks to its temporal cue integration, it tends to produce a number of false positives. To address this, the framework incorporates a robust tracking module that serves as a filter. The tracker computes the Intersection over Union (IoU) between detection boxes and tracker boxes, and only detections that exceed a low IoU threshold—thus demonstrating temporal consistency—are retained. In situations where the detection model's outputs are inconsistent or incomplete, the tracker’s reliable predictions act as a fallback, substantially minimizing false positives and refining overall detection performance.
 
+_Framework with tracking can be used with a different detection model as well_
+
 
 https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
 
