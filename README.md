@@ -1,31 +1,18 @@
 # STMOFlow
-Official implementation of STMOFlow: A Spatiotemporal Framework for  Real-Time Small Object Detection
-
-![Project Image](./output_video/model_architecture.png)
-
-
 ## About STMOFlow
 
-STMOFlow is an implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real-Time Small Object Detection."** This repository focuses on enhancing the detection of small moving objects—such as drones—in dynamic scenes by integrating spatial and temporal information into the detection pipeline.
+STMOFlow is an official implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real-Time Small Object Detection."**
+
+![Project Image](./output_video/model_architecture.png)
 
 ### Model Overview
 
 - **Spatiotemporal Integration:**  
-  The core detection model is based on YOLOv8, which has been adapted to process a unique 3-channel input created by stacking grayscale frames from consecutive video frames. This approach allows the model to capture temporal context directly, enabling it to detect subtle motion cues that are often missed by traditional, single-frame detectors. In addition, the model uses an auxiliary optical flow stream to explicitly capture motion dynamics, further enriching the temporal feature set. This dual-stream architecture leads to more robust and accurate detection of small, fast-moving objects in complex environments.
-
-- **Real-Time Performance:**  
-  By leveraging both spatial and temporal cues, the model achieves real-time performance while maintaining high detection accuracy. The combination of multi-frame processing and optical flow integration ensures that the network is sensitive to the movement of objects while still accurately localizing them in each frame.
+  The core detection model leverages a two-stream architecture to effectively integrate temporal context with a dual-path approach where one stream processes a stack of consecutive frames to extract robust spatial features, while the other computes optical flow to explicitly capture motion dynamics.
 
 ### Tracking Integration
 
-- **Enhanced Temporal Consistency:**  
-  To improve detection reliability, especially in challenging scenarios with potential false positives, STMOFlow incorporates a tracking module based on the DeepSORT algorithm. This tracker associates detection results across consecutive frames, maintaining object identities over time. As a result, the system achieves smoother and more consistent predictions.
-
-- **False Positive Reduction:**  
-  The tracker helps reduce false positives by filtering out detections that do not have temporal consistency. By computing the Intersection over Union (IoU) between detection boxes and tracker boxes, only those detections that are supported by the tracker (i.e., exceed a low IoU threshold) are retained. In cases where detections are inconsistent or missing, the tracker’s output can serve as a fallback, thus further refining the overall detection performance.
-
-Overall, STMOFlow offers a comprehensive solution for real-time small object detection and tracking. Its spatiotemporal framework is particularly suited for applications in surveillance, UAV monitoring, and other dynamic environments where both accuracy and speed are critical.
-
+  The framework have a tracker that helps **reduce false positives** by **filtering out detections** that do not have temporal consistency. By computing the Intersection over Union (IoU) between detection boxes and tracker boxes, only those detections that are supported by the tracker (i.e., exceed a low IoU threshold) are retained. In cases where detections are inconsistent or missing, the tracker’s output can serve as a fallback, thus further refining the overall detection performance.
 
 
 https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
