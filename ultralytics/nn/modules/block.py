@@ -182,6 +182,84 @@ class SPPF(nn.Module):
         y.extend(self.m(y[-1]) for _ in range(3))
         return self.cv2(torch.cat(y, 1))
 
+class ChannelAttention(nn.Module):
+    def __init__(self, in_channels, reduction_ratio=8):
+        super(ChannelAttention, self).__init__()
+        self.avg_pool = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.fc = nn.Sequential(
+          nn.Conv2d(in_channels, in_channels // reduction_ratio, kernel_size=1, stride=1, bias=False),
+          nn.ReLU(inplace=True),
+          nn.Conv2d(in_channels // reduction_ratio, in_channels, kernel_size=3, stride=1, padding=1, bias=True), 
+          nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False) 
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+
+        avg_out = self.fc(self.avg_pool(x))
+        max_out = self.fc(self.max_pool(x))
+        out = avg_out + max_out
+        out = self.sigmoid(out)
+
+        return out * x
+    
+class SpatialAttention(nn.Module):
+    def __init__(self):
+        super(SpatialAttention, self).__init__()
+        self.conv1 = nn.Conv2d(2, 1, kernel_size=3, padding=1, bias=True)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        out = torch.cat([max_out, avg_out], dim=1)
+        out = self.conv1(out)
+
+        return self.sigmoid(out) * x
+
+class SelfAttention(nn.Module):
+    def __init__(self, in_channels):
+        super(SelfAttention, self).__init__()
+        self.query_conv = nn.Conv2d(in_channels, in_channels // 8, kernel_size=3, padding=2, dilation=2)
+        self.key_conv = nn.Conv2d(in_channels, in_channels // 8, kernel_size=3, padding=2, dilation=2)
+        self.value_conv = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=2, dilation=2)
+        self.softmax = nn.Softmax(dim=-1)  # Apply softmax to the last dimension
+
+    def forward(self, x):
+        batch_size, channels, height, width = x.size()
+        query = self.query_conv(x).view(batch_size, -1, height * width).permute(0, 2, 1)
+        key = self.key_conv(x).view(batch_size, -1, height * width)
+        value = self.value_conv(x).view(batch_size, -1, height * width)
+
+        attention = torch.bmm(query, key)
+        attention = self.softmax(attention)
+
+        out = torch.bmm(value, attention.permute(0, 2, 1))
+        out = out.view(batch_size, channels, height, width)
+
+        return out + x  # Residual connection
+
+class LCBHAM(nn.Module):
+    def __init__(self, in_channels, out_channels, reduction_ratio=8):
+        super(LCBHAM, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=True)
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.hardswish = nn.Hardswish()
+        self.self_attention = SelfAttention(out_channels)
+        self.channel_attention = ChannelAttention(out_channels, reduction_ratio)
+        self.spatial_attention = SpatialAttention()
+
+    def forward(self, x):
+        out = self.conv(x)
+        out = self.bn(out)
+        out = self.hardswish(out)
+        out = self.self_attention(out)
+        out = self.channel_attention(out)
+        out = self.spatial_attention(out)
+        return out
+
 class C1(nn.Module):
     """CSP Bottleneck with 1 convolution."""
 
