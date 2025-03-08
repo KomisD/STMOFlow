@@ -1,4 +1,23 @@
 # STMOFlow
+
+# Table of Contents
+
+- [About STMOFlow](#about-stmoflow)
+  - [Model Overview](#model-overview)
+  - [Tracking Integration](#tracking-integration)
+- [Demo Videos](#demo-videos)
+  - [Video 1: Plain Detections](#video-1-plain-detections)
+  - [Video 2: Filtered Detections](#video-2-filtered-detections)
+- [STMOFlow Installation Guide](#stmoflow-installation-guide)
+  - [Fork the Repository](#fork-the-repository)
+  - [Clone Your Repository](#clone-your-repository)
+  - [Set Up Your Conda Environment](#set-up-your-conda-environment)
+  - [Install the Project Dependencies](#install-the-project-dependencies)
+- [Detect In a Local Video](#detect-in-a-local-video)
+  - [Plain Detection](#plain-detection)
+  - [Detection with Tracking](#detection-with-tracking)
+
+
 ## About STMOFlow
 
 STMOFlow is an official implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real-Time Small Object Detection."**
