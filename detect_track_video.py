@@ -4,6 +4,7 @@ import argparse
 from ultralytics import YOLO
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
+
 def initialize_tracker():
     return DeepSort(
         max_age=10,
@@ -17,47 +18,42 @@ def initialize_tracker():
         bgr=True
     )
 
+
 def calculate_iou(box1, box2):
-    """
-    Calculate Intersection over Union (IoU) between two boxes.
-    Boxes are in [x, y, w, h] format.
-    """
     b1_x1, b1_y1, b1_w, b1_h = box1
     b2_x1, b2_y1, b2_w, b2_h = box2
-
     b1_x2 = b1_x1 + b1_w
     b1_y2 = b1_y1 + b1_h
     b2_x2 = b2_x1 + b2_w
     b2_y2 = b2_y1 + b2_h
-
     inter_x1 = max(b1_x1, b2_x1)
     inter_y1 = max(b1_y1, b2_y1)
     inter_x2 = min(b1_x2, b2_x2)
     inter_y2 = min(b1_y2, b2_y2)
-
     inter_w = max(0, inter_x2 - inter_x1)
     inter_h = max(0, inter_y2 - inter_y1)
     inter_area = inter_w * inter_h
-
     area1 = b1_w * b1_h
     area2 = b2_w * b2_h
     union_area = area1 + area2 - inter_area
     return inter_area / union_area if union_area > 0 else 0
 
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Run YOLO detection and DeepSORT tracking on a video file. "
-                    "Green: Detections, Red: Tracker boxes, Blue: Final boxes."
+        description="Run YOLO detection and DeepSORT tracking on a video file."
     )
     parser.add_argument("video", help="Path to the input video file.")
-    parser.add_argument("--save", action="store_true", help="Save final detection boxes (blue) to a file.")
-    parser.add_argument("--weights", default="model_weights/best.pt", help="Path to the YOLO model weights.")
+    parser.add_argument("--save", action="store_true",
+                        help="Save final detection boxes (blue) to a file.")
+    parser.add_argument("--weights", default="model_weights/best.pt",
+                        help="Path to the YOLO model weights.")
+    parser.add_argument("--colab", action="store_true",
+                        help="If set, writes annotated video out and skips GUI display (for Colab).")
     args = parser.parse_args()
 
-    # Load YOLO model.
+    # Load YOLO model and tracker
     model = YOLO(args.weights)
-
-    # Initialize DeepSORT tracker.
     tracker = initialize_tracker()
 
     cap = cv2.VideoCapture(args.video)
@@ -65,132 +61,122 @@ def main():
         print("Error: Could not open video file.")
         return
 
-    # Prepare file for saving final boxes if --save is enabled.
+    # Prepare save file
     if args.save:
-        output_dir = "output_tracking_evaluation"
-        os.makedirs(output_dir, exist_ok=True)
-        detections_file_path = os.path.join(output_dir, "video_final_detections.txt")
-        detections_file = open(detections_file_path, "w")
-        print(f"Saving final detections to: {detections_file_path}")
+        out_dir = "output_tracking_evaluation"
+        os.makedirs(out_dir, exist_ok=True)
+        det_path = os.path.join(out_dir, "video_final_detections.txt")
+        det_file = open(det_path, "w")
+        print(f"Saving final detections to: {det_path}")
 
-    cv2.namedWindow('Detection, Tracking, and Final', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Detection, Tracking, and Final', 1080, 640)
+    # Colab video writer setup
+    if args.colab:
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        os.makedirs("output_tracking_evaluation", exist_ok=True)
+        out_vid = os.path.join("output_tracking_evaluation", "annotated_tracking.mp4")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(out_vid, fourcc, fps, (w, h))
+        if not writer.isOpened():
+            print("Error: could not open VideoWriter.")
+            return
+    else:
+        cv2.namedWindow('Detect/Track/Final', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Detect/Track/Final', 1080, 640)
 
-    # Read the first three frames for a sliding window.
-    ret, frame_prev = cap.read()
+    # Read initial sliding window frames
+    ret, prev = cap.read()
     if not ret:
         print("Error: Unable to read first frame.")
         return
-    ret, frame_curr = cap.read()
+    ret, curr = cap.read()
     if not ret:
-        frame_curr = frame_prev.copy()
-    ret, frame_next = cap.read()
+        curr = prev.copy()
+    ret, nxt = cap.read()
     if not ret:
-        frame_next = frame_curr.copy()
+        nxt = curr.copy()
 
-    frame_counter = 0
-
+    frame_idx = 0
     while True:
-        frame_counter += 1
+        frame_idx += 1
+        # merge frames
+        pg = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+        cg = cv2.cvtColor(curr, cv2.COLOR_BGR2GRAY)
+        ng = cv2.cvtColor(nxt, cv2.COLOR_BGR2GRAY)
+        merged = cv2.merge([pg, cg, ng])
 
-        # Create merged frame from previous, current, and next frames.
-        prev_gray = cv2.cvtColor(frame_prev, cv2.COLOR_BGR2GRAY)
-        curr_gray = cv2.cvtColor(frame_curr, cv2.COLOR_BGR2GRAY)
-        next_gray = cv2.cvtColor(frame_next, cv2.COLOR_BGR2GRAY)
-        merged_frame = cv2.merge([prev_gray, curr_gray, next_gray])
-
-        # Run YOLO detection on the merged frame.
-        results = model(merged_frame, imgsz=1280, conf=0.5, iou=0.15)
-        detections = results[0]
-        detected_boxes_with_conf = []  # Detections for visualization (green)
-        detection_list = []  # For tracker update: ([x,y,w,h], conf, 'object')
-        boxes = detections.boxes.data.cpu().numpy()
-        for det in boxes:
-            x1, y1, x2, y2, conf, cls = det
+        # detection
+        res = model(merged, imgsz=1280, conf=0.5, iou=0.15)[0]
+        boxes_np = res.boxes.data.cpu().numpy()
+        det_vis = []
+        det_list = []
+        for x1,y1,x2,y2,conf,cls in boxes_np:
             if conf > 0.1:
-                x = x1
-                y = y1
-                w = x2 - x1
-                h = y2 - y1
-                detected_boxes_with_conf.append([x, y, w, h, conf])
-                detection_list.append(([x, y, w, h], conf, 'object'))
+                w_box, h_box = x2-x1, y2-y1
+                det_vis.append([x1,y1,w_box,h_box,conf])
+                det_list.append(([x1,y1,w_box,h_box], conf, 'object'))
 
-        # Update tracker with current detections.
-        tracks = tracker.update_tracks(detection_list, frame=frame_curr)
-        tracked_boxes = []
-        for track in tracks:
-            if not track.is_confirmed():
-                continue
-            ltrb = track.to_ltrb()
-            x1, y1, x2, y2 = map(int, ltrb)
-            tracked_boxes.append([x1, y1, x2 - x1, y2 - y1])
+        # tracking
+        tracks = tracker.update_tracks(det_list, frame=curr)
+        track_boxes = []
+        for t in tracks:
+            if not t.is_confirmed(): continue
+            ltrb = t.to_ltrb()
+            x1,y1,x2,y2 = map(int, ltrb)
+            track_boxes.append([x1,y1,x2-x1,y2-y1])
 
-        # Determine final boxes (blue) using the following logic:
-        #   1. If both detection and tracker boxes exist, filter detections by IoU > 0.1 with any tracker box.
-        #      If none pass, fall back to tracker boxes (with default confidence 1.0).
-        #   2. If only detections exist, use them.
-        #   3. If only tracker boxes exist, use them.
-        if detected_boxes_with_conf and tracked_boxes:
-            filtered_detections = []
-            for detection in detected_boxes_with_conf:
-                for trk in tracked_boxes:
-                    if calculate_iou(detection[:4], trk) > 0.1:
-                        filtered_detections.append(detection)
-                        break
-            if filtered_detections:
-                final_boxes = filtered_detections
-            else:
-                final_boxes = [[x, y, w, h, 1.0] for (x, y, w, h) in tracked_boxes]
-        elif detected_boxes_with_conf:
-            final_boxes = detected_boxes_with_conf
-        elif tracked_boxes:
-            final_boxes = [[x, y, w, h, 1.0] for (x, y, w, h) in tracked_boxes]
+        # final boxes
+        if det_vis and track_boxes:
+            filt = [d for d in det_vis if any(calculate_iou(d[:4], tb)>0.1 for tb in track_boxes)]
+            final = filt if filt else [[*tb,1.0] for tb in track_boxes]
+        elif det_vis:
+            final = det_vis
+        elif track_boxes:
+            final = [[*tb,1.0] for tb in track_boxes]
         else:
-            final_boxes = []
+            final = []
 
-        # Visualization:
-        vis_frame = frame_curr.copy()
-        # Draw YOLO detections in green.
-        for det in detected_boxes_with_conf:
-            x, y, w, h, conf = det
-            cv2.rectangle(vis_frame, (int(x), int(y)), (int(x+w), int(y+h)), (0, 255, 0), 2)
-        # Draw tracker boxes in red.
-        for trk in tracked_boxes:
-            x, y, w, h = trk
-            cv2.rectangle(vis_frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
-        # Draw final boxes in blue on top.
-        for final in final_boxes:
-            x, y, w, h, conf = final
-            cv2.rectangle(vis_frame, (int(x), int(y)), (int(x+w), int(y+h)), (255, 0, 0), 2)
+        # visualize
+        vis = curr.copy()
+        for x,y,w_box,h_box,conf in det_vis:
+            cv2.rectangle(vis, (int(x),int(y)), (int(x+w_box),int(y+h_box)), (0,255,0),2)
+        for x,y,w_box,h_box in track_boxes:
+            cv2.rectangle(vis, (x,y), (x+w_box,y+h_box), (0,0,255),2)
+        for x,y,w_box,h_box,conf in final:
+            cv2.rectangle(vis, (int(x),int(y)), (int(x+w_box),int(y+h_box)), (255,0,0),2)
 
+        # output
+        if args.colab:
+            writer.write(vis)
+        else:
+            cv2.imshow('Detect/Track/Final', vis)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
+        # save detections file
+        if args.save:
+            parts = [str(frame_idx), str(len(final))]
+            for x,y,w_box,h_box,conf in final:
+                parts.extend([str(int(x)),str(int(y)),str(int(w_box)),str(int(h_box)),f"{conf:.2f}"])
+            det_file.write(" ".join(parts)+"\n")
 
-        cv2.imshow('Detection, Tracking, and Final', vis_frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # shift
+        prev, curr = curr, nxt
+        ret, nxt = cap.read()
+        if not ret:
             break
 
-        # If save is enabled, write only the final (blue) boxes.
-        if args.save:
-            # Format: frame_number num_final_boxes x y w h conf (for each box)
-            line_parts = [str(frame_counter), str(len(final_boxes))]
-            for box in final_boxes:
-                x, y, w, h, conf = box
-                line_parts.extend([str(int(x)), str(int(y)), str(int(w)), str(int(h)), f"{conf:.2f}"])
-            detections_file.write(" ".join(line_parts) + "\n")
-
-            # Update sliding window: shift frames.
-        frame_prev = frame_curr
-        frame_curr = frame_next
-        ret, frame_next = cap.read()
-        if not ret:
-            break  # Exit the loop when the video ends.
-        # Duplicate last frame if video ends.
-
     cap.release()
+    if args.colab:
+        writer.release()
+        print(f"Annotated tracking video saved to: {out_vid}")
     if args.save:
-        detections_file.close()
-    cv2.destroyAllWindows()
+        det_file.close()
+    if not args.colab:
+        cv2.destroyAllWindows()
     print("Processing complete.")
+
 
 if __name__ == "__main__":
     main()
