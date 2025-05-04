@@ -17,6 +17,7 @@
   - [Plain Detection](#plain-detection)
   - [Detection with Tracking](#detection-with-tracking)
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing]
 
 ## About STMOFlow
 
