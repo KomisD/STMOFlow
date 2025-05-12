@@ -1,122 +1,153 @@
 # STMOFlow
 
-# Table of Contents
-
-- [About STMOFlow](#about-stmoflow)
-  - [Model Overview](#model-overview)
-  - [Tracking Integration](#tracking-integration)
-- [Demo Videos](#demo-videos)
-  - [Video 1: Plain Detections](#video-1-plain-detections)
-  - [Video 2: Filtered Detections](#video-2-filtered-detections)
-- [STMOFlow Installation Guide](#stmoflow-installation-guide)
-  - [Fork the Repository](#fork-the-repository)
-  - [Clone Your Repository](#clone-your-repository)
-  - [Set Up Your Conda Environment](#set-up-your-conda-environment)
-  - [Install the Project Dependencies](#install-the-project-dependencies)
-- [Detect In a Local Video](#detect-in-a-local-video)
-  - [Plain Detection](#plain-detection)
-  - [Detection with Tracking](#detection-with-tracking)
-
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing)
+
+---
+
+## Table of Contents
+
+* [About STMOFlow](#about-stmoflow)
+
+  * [Model Overview](#model-overview)
+  * [Tracking Integration](#tracking-integration)
+* [Hosted API Demo](#hosted-api-demo)
+
+  * [Quick Test (cURL)](#quick-test-curl)
+  * [Interactive Docs](#interactive-docs)
+* [Demo Videos](#demo-videos)
+
+  * [Video 1: Plain Detections](#video-1-plain-detections)
+  * [Video 2: Filtered Detections](#video-2-filtered-detections)
+* [STMOFlow Installation Guide](#stmoflow-installation-guide)
+
+  * [Fork the Repository](#fork-the-repository)
+  * [Clone Your Repository](#clone-your-repository)
+  * [Set Up Your Conda Environment](#set-up-your-conda-environment)
+  * [Install the Project Dependencies](#install-the-project-dependencies)
+* [Detect In a Local Video](#detect-in-a-local-video)
+
+  * [Plain Detection](#plain-detection)
+  * [Detection with Tracking](#detection-with-tracking)
+
+---
 
 ## About STMOFlow
 
-STMOFlow is an official implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real-Time Small Object Detection."**
-
-An efficient way to detect small objects and reduce false positives.
+STMOFlow is the official implementation of the techniques described in the paper **"STMOFlow: A Spatiotemporal Framework for Real‑Time Small Object Detection."**
+It combines temporal context (multi‑frame stacks and optical flow) with YOLOv8 to detect tiny objects and integrates **DeepSORT** tracking to prune false positives.
 
 ![Project Image](./output_video/model_architecture.png)
 
-
 ### Model Overview
 
-The core detection model leverages a two-stream architecture that integrates temporal context in two ways: one stream processes a stack of consecutive frames to extract robust spatial features, while the other computes optical flow to explicitly capture motion dynamics. This dual-path approach enables the detection model to pick up even the tiniest objects by exploiting subtle temporal cues.
+The detection backbone has two streams:
+
+1. **Spatial stream** – stacks consecutive RGB frames to extract robust spatial features.
+2. **Temporal stream** – computes optical‑flow maps to capture motion dynamics.
+
+Fusing the two yields high recall on very small objects.
 
 ### Tracking Integration
 
-Although the detection model is highly sensitive to small objects thanks to its temporal cue integration, it tends to produce a number of false positives. To address this, the framework incorporates a robust tracking module that serves as a filter. The tracker computes the Intersection over Union (IoU) between detection boxes and tracker boxes, and only detections that exceed a low IoU threshold—thus demonstrating temporal consistency—are retained. In situations where the detection model's outputs are inconsistent or incomplete, the tracker’s reliable predictions act as a fallback, substantially minimizing false positives and refining overall detection performance.
+Detections are passed to a **DeepSORT** tracker.  Boxes that keep a consistent IoU with tracker hypotheses are retained; the rest are dropped.  This simple filter slashes false positives and provides stable IDs across frames.
 
-_Framework with tracking can be used with a different detection model as well_
+> *The same filtering layer can be used with any detection model.*
+
+---
+
+## Hosted API Demo
+
+Spin‑up is optional!  A fully‑hosted REST API is live so you can try the model without cloning anything.
+
+### Quick Test (cURL)
+
+```bash
+curl -X POST "http://13.60.254.110/detect/?return_video=true" \
+  -F "file=@your_video.mp4" \
+  --output annotated.mp4
+```
+
+| Parameter      | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `file`         | Video to annotate (MP4/AVI/MOV/MKV).                    |
+| `return_video` | When `true`, the server streams back the annotated MP4. |
+
+The command uploads `your_video.mp4`, runs detection + tracking, and downloads **`annotated.mp4`** with coloured overlays and ID labels.
+
+> **Tip:** large uploads are supported (NGINX configured with `client_max_body_size 500M`).
+
+### Interactive Docs
+
+API reference and an in‑browser tester are auto‑generated by FastAPI:
+👉 **[http://13.60.254.110/docs](http://13.60.254.110/docs)**
+
+Use the file‑picker there if you prefer a GUI instead of cURL.
+
+---
 
 ## Demo Videos
 
-The videos below showcase the difference between the plain detection model and the enhanced framework that includes filtering via tracking. In the first video, you can see the raw detections produced by the model using temporal cues, which, while sensitive to tiny objects, also yield several false positives. The second video demonstrates how the tracking module refines these detections by filtering out inconsistent results, leading to more accurate and reliable outputs.
+Below are two side‑by‑side examples showing the benefit of the tracking filter.
 
-- **Video 1: Plain Detections**  
-  This video illustrates the detections obtained directly from the model without any filtering.
+* **Video 1: Plain Detections** – raw YOLO detections on stacked frames.
+* **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
 
-- **Video 2: Filtered Detections**  
-  This video shows the detections after applying the tracking-based filtering, which significantly reduces false positives.
+[https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f](https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f)
 
-https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f
+[https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac](https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac)
 
-
-
-https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac
-
-
-
-
-
+---
 
 # STMOFlow Installation Guide
-This guide will walk you through setting up the STMOFlow project locally. It includes instructions on forking the repository, cloning it, creating a Conda environment, activating it, and installing the necessary dependencies.
+
+> Skip this section if you only want to hit the hosted API.  The steps below are for running the pipeline **locally**.
 
 ## Fork the Repository
-- Fork the Repository
-- Clone Your Repository:
-```
-git clone https://github.com/your-username/STMOFlow.git
-```
-- Navigate into the Repository:
-```
+
+1. Click **Fork** on GitHub.
+2. Clone *your* copy:
+
+```bash
+git clone https://github.com/<your‑username>/STMOFlow.git
 cd STMOFlow
 ```
 
 ## Set Up Your Conda Environment
-- Create a Conda Environment
-```
+
+```bash
 conda create -n STMOFlow python=3.12.4
-```
-- Activate the Environment
-```
 conda activate STMOFlow
 ```
 
 ## Install the Project Dependencies
-```
+
+```bash
 pip install -r requirements.txt
 ```
 
+---
+
 # Detect In a Local Video
 
-This section explains how to run the inference scripts for both plain detection and detection with tracking. Both scripts process a local video file and optionally save the results to a file when the `--save` flag is used.
-
+Run either of the scripts below on a local file.  Add `--save` to write outputs.
 
 ## Plain Detection
 
-The plain detection script uses a sliding window to merge consecutive video frames and performs YOLO detection on the merged frame. It then displays the detection results in a window and, if enabled, writes the detection details to a text file.
-
-```
-   python plain_detection.py path/to/your/video.mp4
+```bash
+python plain_detection.py path/to/your/video.mp4
 ```
 
 ## Detection with Tracking
 
-The detection with tracking script integrates YOLO detection with DeepSORT tracking. In addition to running detection, it uses a tracker to maintain object identities across frames. The script visualizes:
-
-- Green Boxes: YOLO detections.
-- Red Boxes: Tracker outputs.
-- Blue Boxes: Final detection boxes (after filtering based on IoU with tracker boxes).
-
-```
-python detection_with_tracking.py path/to/your/video.mp4
+```bash
+python detection_with_tracking.py path/to/your/video.mp4 [--save]
 ```
 
-If you want to save the detections, you may run:
-```
-python detection_with_tracking.py path/to/your/video.mp4 --save
-```
+* **Green boxes** – YOLO detections
+* **Red boxes** – DeepSORT tracker
+* **Blue boxes** – Final detections after IoU filtering
 
+---
 
-
+> **License:** MIT
+> **Contact:** \<your‑[email@example.com](mailto:email@example.com)>
