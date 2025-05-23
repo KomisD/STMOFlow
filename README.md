@@ -35,7 +35,7 @@ STMOFlow combines temporal context (multi‑frame stacks and optical flow) with 
 
 * **DEMO**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing)
 
-* **Video 1: Plain Detections** – raw YOLO detections on stacked frames.
+* **Video 1: Plain Detections** – raw detections on stacked frames.
 * **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
 
 [https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f](https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f)
