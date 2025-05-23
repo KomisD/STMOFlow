@@ -12,10 +12,6 @@
 
   * [Quick Test (cURL)](#quick-test-curl)
   * [Interactive Docs](#interactive-docs)
-* [Demo Videos](#demo-videos)
-
-  * [Video 1: Plain Detections](#video-1-plain-detections)
-  * [Video 2: Filtered Detections](#video-2-filtered-detections)
 * [STMOFlow Installation Guide](#stmoflow-installation-guide)
 
   * [Fork the Repository](#fork-the-repository)
