@@ -1,44 +1,38 @@
 # STMOFlow
 
----
+-----
 
 ## Table of Contents
 
-* [About STMOFlow](#about-stmoflow)
+- [About STMOFlow](#about-stmoflow)
+  - [Model Overview](#model-overview)
+  - [Tracking Integration](#tracking-integration)
+  - [Performance](#performance)
+- [Hosted API Demo](#hosted-api-demo)
+  - [Quick Test (cURL)](#quick-test-curl)
+  - [Interactive Docs](#interactive-docs)
+- [STMOFlow Installation Guide](#stmoflow-installation-guide)
+  - [Fork the Repository](#fork-the-repository)
+  - [Clone Your Repository](#clone-your-repository)
+  - [Set Up Your Conda Environment](#set-up-your-conda-environment)
+  - [Install the Project Dependencies](#install-the-project-dependencies)
+- [Detect In a Local Video](#detect-in-a-local-video)
+  - [Plain Detection](#plain-detection)
+  - [Detection with Tracking](#detection-with-tracking)
 
-  * [Model Overview](#model-overview)
-  * [Tracking Integration](#tracking-integration)
-  * [Performance](#performance)
-* [Hosted API Demo](#hosted-api-demo)
-
-  * [Quick Test (cURL)](#quick-test-curl)
-  * [Interactive Docs](#interactive-docs)
-* [STMOFlow Installation Guide](#stmoflow-installation-guide)
-
-  * [Fork the Repository](#fork-the-repository)
-  * [Clone Your Repository](#clone-your-repository)
-  * [Set Up Your Conda Environment](#set-up-your-conda-environment)
-  * [Install the Project Dependencies](#install-the-project-dependencies)
-* [Detect In a Local Video](#detect-in-a-local-video)
-
-  * [Plain Detection](#plain-detection)
-  * [Detection with Tracking](#detection-with-tracking)
-
----
+-----
 
 ## About STMOFlow
 
 STMOFlow combines temporal context (multi‑frame stacks and optical flow) with YOLOv8 to detect tiny objects and integrates **DeepSORT** tracking to prune false positives.
 
-* **DEMO**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing)
+- **DEMO**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing)
+- **Video 1: Plain Detections** – raw detections on stacked frames.
+- **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
 
-* **Video 1: Plain Detections** – raw detections on stacked frames.
-* **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
+<https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f>
 
-[https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f](https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f)
-
-[https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac](https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac)
-
+<https://github.com/user-attachments/assets/f57f58c9-228d-45e7-8896-abc42907eaac>
 
 ![Project Image](./output_video/model_architecture.png)
 
@@ -47,7 +41,7 @@ STMOFlow combines temporal context (multi‑frame stacks and optical flow) with 
 The detection backbone has two streams:
 
 1. **Spatial stream** – stacks consecutive RGB frames to extract robust spatial features.
-2. **Temporal stream** – computes optical‑flow maps to capture motion dynamics.
+1. **Temporal stream** – computes optical‑flow maps to capture motion dynamics.
 
 Fusing the two yields high recall on very small objects.
 
@@ -57,23 +51,17 @@ Detections are passed to a **DeepSORT** tracker. Boxes that keep a consistent Io
 
 > *The same filtering layer can be used with any detection model.*
 
----
+-----
 
 ### Performance
 
 STMOFlow was evaluated on the **DroneVsBird dataset** as part of the **VIP Cup 2025** competition, placing **4th out of 15 international teams**. The method ranked within the leading performance cluster — separated from 3rd place by a narrow margin, with a substantial gap ahead of the remaining 11 teams.
 
-| Rank | Method     | Notes                        |
-|------|------------|------------------------------|
-| 1    | —          | Top competing team           |
-| 2    | —          | —                            |
-| 3    | —          | —                            |
-| **4**| **STMOFlow** | **Ours — within top cluster** |
-| 5–15 | —          | Significant performance gap  |
+![VIP Cup 2025 Leaderboard](./IMG_3511.jpeg)
 
-> Results based on official VIP Cup 2025 leaderboard. Ground-truth metric values were not released to participants; ranking reflects the official bar-chart standings.
+> Results based on the official VIP Cup 2025 leaderboard. Ground-truth metric values were not released to participants; ranking reflects the official bar-chart standings.
 
----
+-----
 
 ## Hosted API Demo
 
@@ -87,21 +75,21 @@ curl -X POST "http://13.60.254.110/detect/?return_video=true" \
   --output annotated.mp4
 ```
 
-| Parameter      | Description                                             |
-| -------------- | ------------------------------------------------------- |
-| `file`         | Video to annotate (MP4/AVI/MOV/MKV).                    |
-| `return_video` | When `true`, the server streams back the annotated MP4. |
+|Parameter     |Description                                            |
+|--------------|-------------------------------------------------------|
+|`file`        |Video to annotate (MP4/AVI/MOV/MKV).                   |
+|`return_video`|When `true`, the server streams back the annotated MP4.|
 
 The command uploads `your_video.mp4`, runs detection + tracking, and downloads **`annotated.mp4`** with coloured overlays and ID labels.
 
 ### Interactive Docs
 
 API reference and an in‑browser tester are auto‑generated by FastAPI:
-👉 **[http://13.60.254.110/docs](http://13.60.254.110/docs)**
+👉 **<http://13.60.254.110/docs>**
 
 Use the file‑picker there if you prefer a GUI instead of cURL.
 
----
+-----
 
 # STMOFlow Installation Guide
 
@@ -110,7 +98,7 @@ Use the file‑picker there if you prefer a GUI instead of cURL.
 ## Fork the Repository
 
 1. Click **Fork** on GitHub.
-2. Clone *your* copy:
+1. Clone *your* copy:
 
 ```bash
 git clone https://github.com/KomisD/STMOFlow.git
@@ -130,7 +118,7 @@ conda activate STMOFlow
 pip install -r requirements.txt
 ```
 
----
+-----
 
 # Detect In a Local Video
 
@@ -148,11 +136,11 @@ python plain_detection.py path/to/your/video.mp4
 python detection_with_tracking.py path/to/your/video.mp4 [--save]
 ```
 
-* **Green boxes** – YOLO detections
-* **Red boxes** – DeepSORT tracker
-* **Blue boxes** – Final detections after IoU filtering
+- **Green boxes** – YOLO detections
+- **Red boxes** – DeepSORT tracker
+- **Blue boxes** – Final detections after IoU filtering
 
----
+-----
 
 > **License:** MIT
 > **Contact:** [komdimos@gmail.com](mailto:komdimos@gmail.com)
