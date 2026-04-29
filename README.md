@@ -8,6 +8,7 @@
 
   * [Model Overview](#model-overview)
   * [Tracking Integration](#tracking-integration)
+  * [Performance](#performance)
 * [Hosted API Demo](#hosted-api-demo)
 
   * [Quick Test (cURL)](#quick-test-curl)
@@ -31,8 +32,8 @@ STMOFlow combines temporal context (multi‑frame stacks and optical flow) with 
 
 * **DEMO**: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jq1W2KXS2nk8yEwnYuxwv9eWyLnloNaF?usp=sharing)
 
-* **Video 1: Plain Detections** – raw detections on stacked frames.
-* **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
+* **Video 1: Plain Detections** – raw detections on stacked frames.
+* **Video 2: Filtered Detections** – same clip after DeepSORT pruning.
 
 [https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f](https://github.com/user-attachments/assets/242533f8-f957-424b-8490-36b59c9a694f)
 
@@ -52,15 +53,31 @@ Fusing the two yields high recall on very small objects.
 
 ### Tracking Integration
 
-Detections are passed to a **DeepSORT** tracker.  Boxes that keep a consistent IoU with tracker hypotheses are retained; the rest are dropped.  This simple filter slashes false positives and provides stable IDs across frames.
+Detections are passed to a **DeepSORT** tracker. Boxes that keep a consistent IoU with tracker hypotheses are retained; the rest are dropped. This simple filter slashes false positives and provides stable IDs across frames.
 
 > *The same filtering layer can be used with any detection model.*
 
 ---
 
+### Performance
+
+STMOFlow was evaluated on the **DroneVsBird dataset** as part of the **VIP Cup 2025** competition, placing **4th out of 15 international teams**. The method ranked within the leading performance cluster — separated from 3rd place by a narrow margin, with a substantial gap ahead of the remaining 11 teams.
+
+| Rank | Method     | Notes                        |
+|------|------------|------------------------------|
+| 1    | —          | Top competing team           |
+| 2    | —          | —                            |
+| 3    | —          | —                            |
+| **4**| **STMOFlow** | **Ours — within top cluster** |
+| 5–15 | —          | Significant performance gap  |
+
+> Results based on official VIP Cup 2025 leaderboard. Ground-truth metric values were not released to participants; ranking reflects the official bar-chart standings.
+
+---
+
 ## Hosted API Demo
 
-Spin‑up is optional!  A fully‑hosted REST API is live so you can try the model without cloning anything.
+Spin‑up is optional! A fully‑hosted REST API is live so you can try the model without cloning anything.
 
 ### Quick Test (cURL)
 
@@ -75,7 +92,7 @@ curl -X POST "http://13.60.254.110/detect/?return_video=true" \
 | `file`         | Video to annotate (MP4/AVI/MOV/MKV).                    |
 | `return_video` | When `true`, the server streams back the annotated MP4. |
 
-The command uploads `your_video.mp4`, runs detection + tracking, and downloads **`annotated.mp4`** with coloured overlays and ID labels.
+The command uploads `your_video.mp4`, runs detection + tracking, and downloads **`annotated.mp4`** with coloured overlays and ID labels.
 
 ### Interactive Docs
 
@@ -88,7 +105,7 @@ Use the file‑picker there if you prefer a GUI instead of cURL.
 
 # STMOFlow Installation Guide
 
-> Skip this section if you only want to hit the hosted API.  The steps below are for running the pipeline **locally**.
+> Skip this section if you only want to hit the hosted API. The steps below are for running the pipeline **locally**.
 
 ## Fork the Repository
 
@@ -117,7 +134,7 @@ pip install -r requirements.txt
 
 # Detect In a Local Video
 
-Run either of the scripts below on a local file.  Add `--save` to write outputs.
+Run either of the scripts below on a local file. Add `--save` to write outputs.
 
 ## Plain Detection
 
@@ -138,4 +155,4 @@ python detection_with_tracking.py path/to/your/video.mp4 [--save]
 ---
 
 > **License:** MIT
-> **Contact:** \<[komdimos@gmail.com](mailto:komdimos@gmail.com)>
+> **Contact:** [komdimos@gmail.com](mailto:komdimos@gmail.com)
